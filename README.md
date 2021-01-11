@@ -30,7 +30,9 @@ const config: NrfTerminalConfig = {
         },
     ],
     commands: {
-        my_custom_command: () => console.log('Doing something...'),
+        my_custom_command: () => {
+            console.log('Doing something...');
+        },
     },
     prompt: 'AT[:lineCount]>',
     showTimestamps: true,
