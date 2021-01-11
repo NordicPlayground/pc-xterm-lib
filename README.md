@@ -14,12 +14,6 @@ It should not be considered remotely production ready; there are lots of bugs an
 -   [ ] Custom styling of defined text / input via regex
 -   [ ] Probably lots more
 
-## Architecture
-
-Please see the diagram below and [this presentation](https://nordicsemi.sharepoint.com/:p:/r/sites/Wayland-MAG/Shared%20Documents/General/XTerm_Presentation.pptx?d=wa4a0f7a2b17b4cf5835d328a0908b2cd&csf=1&web=1&e=VyH30T) for information on how the library is structured.
-
-![architecture_no_alpha](docs/architecture.png)
-
 ## Usage
 
 Since the library is a normal XTerm addon, usage is as straightforward as initialising it and passing it to your terminal's `loadAddon` method:
@@ -47,6 +41,12 @@ const nrfTerminalCommander = new NrfTerminalCommander(config);
 const terminal = new Terminal();
 terminal.loadAddon(nrfTerminalCommander);
 ```
+
+## Architecture
+
+Please see the diagram below and [this presentation](https://nordicsemi.sharepoint.com/:p:/r/sites/Wayland-MAG/Shared%20Documents/General/XTerm_Presentation.pptx?d=wa4a0f7a2b17b4cf5835d328a0908b2cd&csf=1&web=1&e=VyH30T) for information on how the library is structured.
+
+![architecture_no_alpha](docs/architecture.png)
 
 ## Feedback
 
