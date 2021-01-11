@@ -46,7 +46,7 @@ terminal.loadAddon(nrfTerminalCommander);
 
 ## Architecture
 
-Please see the diagram below and [this presentation](https://nordicsemi.sharepoint.com/:p:/r/sites/Wayland-MAG/Shared%20Documents/General/XTerm_Presentation.pptx?d=wa4a0f7a2b17b4cf5835d328a0908b2cd&csf=1&web=1&e=VyH30T) for information on how the library is structured.
+Please see the diagram below and [this presentation](docs/XTerm_Presentation.pdf) for information on how the library is structured.
 
 ![architecture_no_alpha](docs/architecture.png)
 
