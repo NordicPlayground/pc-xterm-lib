@@ -95,8 +95,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#historyAddon = historyAddon;
         this.#terminal.loadAddon(historyAddon);
 
-        const timestampAddon = new TimestampAddon(this);
-        this.#terminal.loadAddon(timestampAddon);
+        if (this.#config.showTimestamps) {
+            const timestampAddon = new TimestampAddon(this);
+            this.#terminal.loadAddon(timestampAddon);
+        }
 
         const copyPasteAddon = new CopyPasteAddon(this);
         this.#terminal.loadAddon(copyPasteAddon);
