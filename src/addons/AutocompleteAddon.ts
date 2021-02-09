@@ -6,23 +6,25 @@ export interface Completion {
     description: string;
 }
 
+export type CompleterFunction = (output: string) => Completion[];
+
 const HIGHLIGHTED_CLASS = 'autocomplete__suggestion--highlighted';
 
 export default class AutocompleteAddon extends NrfTerminalAddon {
     name = 'AutocompleteAddon';
-    completions: Completion[];
 
     #isVisible = false;
     #suggestions: number[] = [];
     #root?: HTMLDivElement;
     #container?: HTMLUListElement;
+    #completerFunction: CompleterFunction
     #highlightedIndex = 0;
     #prevOutput = '';
     #hasCancelled = false;
 
-    constructor(commander: NrfTerminalCommander, completions: Completion[]) {
+    constructor(commander: NrfTerminalCommander, completer: CompleterFunction) {
         super(commander);
-        this.completions = completions;
+        this.#completerFunction = completer;
     }
 
     public get isVisible() {
@@ -35,6 +37,10 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
 
     public enable() {
         this.#hasCancelled = false;
+    }
+
+    private get completions(): Completion[] {
+        return this.#completerFunction(this.commander.output);
     }
 
     protected onActivate() {
