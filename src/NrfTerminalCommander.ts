@@ -5,7 +5,7 @@ import Prompt from './Prompt';
 import HistoryAddon from './addons/HistoryAddon';
 import TimestampAddon from './addons/TimestampAddon';
 import CopyPasteAddon from './addons/CopyPasteAddon';
-import AutocompleteAddon, { Completion } from './addons/AutocompleteAddon';
+import AutocompleteAddon, { CompleterFunction, Completion } from './addons/AutocompleteAddon';
 
 import { charCode, CharCodes, isMac } from './utils';
 import HoverAddon, { HoverMetadata } from './addons/HoverAddon';
@@ -18,10 +18,44 @@ export interface KeyEvent {
 export type OutputListener = (output: string) => void;
 
 export interface NrfTerminalConfig {
+    /**
+     * The string to be displayed at the start of each new line.
+     */
     prompt: string;
-    completions: Completion[];
+    /**
+     * A function that, given the current output, returns the list
+     * of autocompletion entries that should be displayed.
+     * 
+     * @example
+     * function completer(output: string) {
+     *   const completions: Completion[] = [
+     *      {
+     *        value: "toggle_autcomplete",
+     *        description: "Toggles autocompletion on and off."
+     *      }
+     *   ];
+     * 
+     *   return completions.filter(i => i.beginsWith(output));
+     * }
+     */
+    completerFunction: CompleterFunction
+    /**
+     * An object where every key is a command, and where typing that
+     * command into the terminal will run the associated function.
+     * 
+     * @example
+     * const commands = {
+     *   toggle_autocomplete: () => console.log("Toggling autocomplete"),
+     *   print_date: () => console.log(new Date())
+     * }
+     */
     commands: { [name: string]: () => void };
     hoverMetadata: HoverMetadata[];
+    /**
+     * Whether or not timestamps should be displayed after each command
+     * is run.
+     */
+    showTimestamps: boolean
 }
 
 /**
@@ -61,15 +95,17 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#historyAddon = historyAddon;
         this.#terminal.loadAddon(historyAddon);
 
-        const timestampAddon = new TimestampAddon(this);
-        this.#terminal.loadAddon(timestampAddon);
+        if (this.#config.showTimestamps) {
+            const timestampAddon = new TimestampAddon(this);
+            this.#terminal.loadAddon(timestampAddon);
+        }
 
         const copyPasteAddon = new CopyPasteAddon(this);
         this.#terminal.loadAddon(copyPasteAddon);
 
         const autocompleteAddon = new AutocompleteAddon(
             this,
-            this.#config.completions
+            this.#config.completerFunction
         );
         this.#terminal.loadAddon(autocompleteAddon);
         this.autocompleteAddon = autocompleteAddon;
