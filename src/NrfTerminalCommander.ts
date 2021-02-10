@@ -5,7 +5,9 @@ import Prompt from './Prompt';
 import HistoryAddon from './addons/HistoryAddon';
 import TimestampAddon from './addons/TimestampAddon';
 import CopyPasteAddon from './addons/CopyPasteAddon';
-import AutocompleteAddon, { CompleterFunction, Completion } from './addons/AutocompleteAddon';
+import AutocompleteAddon, {
+    CompleterFunction,
+} from './addons/AutocompleteAddon';
 
 import { charCode, CharCodes, isMac } from './utils';
 import HoverAddon, { HoverMetadata } from './addons/HoverAddon';
@@ -25,7 +27,7 @@ export interface NrfTerminalConfig {
     /**
      * A function that, given the current output, returns the list
      * of autocompletion entries that should be displayed.
-     * 
+     *
      * @example
      * function completer(output: string) {
      *   const completions: Completion[] = [
@@ -34,15 +36,15 @@ export interface NrfTerminalConfig {
      *        description: "Toggles autocompletion on and off."
      *      }
      *   ];
-     * 
+     *
      *   return completions.filter(i => i.beginsWith(output));
      * }
      */
-    completerFunction: CompleterFunction
+    completerFunction: CompleterFunction;
     /**
      * An object where every key is a command, and where typing that
      * command into the terminal will run the associated function.
-     * 
+     *
      * @example
      * const commands = {
      *   toggle_autocomplete: () => console.log("Toggling autocomplete"),
@@ -55,7 +57,7 @@ export interface NrfTerminalConfig {
      * Whether or not timestamps should be displayed after each command
      * is run.
      */
-    showTimestamps: boolean
+    showTimestamps: boolean;
 }
 
 /**
@@ -98,6 +100,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         if (this.#config.showTimestamps) {
             const timestampAddon = new TimestampAddon(this);
             this.#terminal.loadAddon(timestampAddon);
+            this.registerCommand('toggle_timestamps', () => {
+                timestampAddon.toggleTimestamps();
+            });
         }
 
         const copyPasteAddon = new CopyPasteAddon(this);
@@ -115,10 +120,6 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
         this.#terminal.onKey(this.onKey.bind(this));
         this.#terminal.onData(this.onData.bind(this));
-
-        this.registerCommand('toggle_timestamps', () => {
-            timestampAddon.toggleTimestamps();
-        });
 
         this.registerCommand('show_history', () => {
             console.log(historyAddon.history);
