@@ -1,6 +1,3 @@
-import NrfTerminalCommander, {
-    NrfTerminalConfig,
-} from './NrfTerminalCommander';
+import NrfTerminalCommander from './NrfTerminalCommander';
 
-export type { NrfTerminalConfig };
 export { NrfTerminalCommander };
