@@ -17,7 +17,7 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     #suggestions: number[] = [];
     #root?: HTMLDivElement;
     #container?: HTMLUListElement;
-    #completerFunction: CompleterFunction
+    #completerFunction: CompleterFunction;
     #highlightedIndex = 0;
     #prevOutput = '';
     #hasCancelled = false;
