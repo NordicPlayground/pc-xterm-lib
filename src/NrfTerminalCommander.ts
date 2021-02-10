@@ -37,7 +37,7 @@ export interface NrfTerminalConfig {
      *      }
      *   ];
      *
-     *   return completions.filter(i => i.beginsWith(output));
+     *   return completions.filter(c => c.value.beginsWith(output));
      * }
      */
     completerFunction: CompleterFunction;
