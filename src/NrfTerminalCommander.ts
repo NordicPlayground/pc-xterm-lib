@@ -269,10 +269,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * started, i.e. because a command was just run.
      */
     private breakCurrentCommand() {
+        this.#lineCount += 1;
         this.#terminal.write(this.#prompt.value);
         this.#historyAddon.resetCursor();
         this._output = '';
-        this.#lineCount += 1;
     }
 
     private onData(data: string): void {
