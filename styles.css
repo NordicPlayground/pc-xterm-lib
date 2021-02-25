@@ -1,0 +1,24 @@
+.autocomplete {
+    position: absolute;
+    top: 74px;
+    width: 300px;
+    font-size: 15px;
+    color: #6d6a6a;
+    font-family: monospace;
+    background-color: #ededed;
+    background-color: #feffff;
+}
+.autocomplete ul {
+    padding: 0;
+    margin: 0;
+}
+.autocomplete__suggestion {
+    list-style-type: none;
+    cursor: pointer;
+}
+.autocomplete__suggestion:hover {
+    background-color: #c7c7c7;
+}
+.autocomplete__suggestion--highlighted {
+    background-color: #c7c7c7;
+}
