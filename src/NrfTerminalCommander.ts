@@ -128,6 +128,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.registerCommand('clear_history', () => {
             historyAddon.clearHistory();
         });
+
+        this.registerCustomCommands();
     }
 
     public dispose() {
@@ -169,6 +171,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      */
     private registerCommand(command: string, callback: () => void): void {
         this.#registeredCommands[command] = callback;
+    }
+
+    /**
+     * Registers all custom commands from the provided config
+     */
+    private registerCustomCommands(): void {
+        for (const [command, callback] of Object.entries(this.#config.commands)) {
+            this.registerCommand(command, callback)
+        }
     }
 
     /**
