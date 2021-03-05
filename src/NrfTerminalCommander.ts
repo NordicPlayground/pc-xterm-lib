@@ -192,9 +192,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @param listener The function to call when the user input changes.
      * @returns a function to unregister the listener
      */
-    public registerUserInputChangeListener(
-        listener: UserInputChangeListener
-    ): () => void {
+    public onUserInputChange(listener: UserInputChangeListener): () => void {
         this.#userInputChangeListeners.push(listener);
 
         return () =>
@@ -209,9 +207,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @param listener The function to call when a command is run.
      * @returns a function to unregister the listener
      */
-    public registerRunCommandListener(
-        listener: RunCommandListener
-    ): () => void {
+    public onRunCommand(listener: RunCommandListener): () => void {
         this.#runCommandListeners.push(listener);
 
         return () =>

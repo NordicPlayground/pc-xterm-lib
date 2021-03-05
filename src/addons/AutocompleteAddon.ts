@@ -44,7 +44,7 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     }
 
     protected onActivate() {
-        this.commander.registerUserInputChangeListener(userInput => {
+        this.commander.onUserInputChange(userInput => {
             if (!this.#container) {
                 this.initialiseContainer();
             }
