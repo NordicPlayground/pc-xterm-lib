@@ -83,7 +83,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     #outputValue = '';
 
     #registeredCommands: { [command: string]: () => void } = {};
-    #outputListeners: ((output: string) => void)[] = [];
+    #outputListeners: OutputListener[] = [];
+    #runCommandListeners: ((command: string) => void)[] = [];
 
     constructor(config: NrfTerminalConfig) {
         this.#config = config;
@@ -192,6 +193,22 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     /**
+     * Registers a function that will be called whenever the a command is run,
+     * with the command value.
+     * @param listener The function to call when a command is run.
+     */
+    public registerRunCommandListener(listener: (command: string) => void): void {
+        this.#runCommandListeners.push(listener);
+    }
+
+    /**
+     * Removes all functions that are called whenever a command is run
+     */
+    public clearRunCommandListeners(): void {
+        this.#runCommandListeners = [];
+    }
+
+    /**
      * Removes the command currently being entered into the buffer
      * and replaces it with `newCommand`.
      * @param newCommand The command to write to the screen.
@@ -252,14 +269,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         }
     }
 
-    private runCommand(): void {
-        if (this.output.trim().length) {
-            const callback = this.#registeredCommands[this.output];
+    public runCommand(cmd?: string): void {
+        const command = cmd || this.output.trim();
+        if (command.length) {
+            const callback = this.#registeredCommands[command];
             if (callback) {
                 callback();
             }
+            this.#runCommandListeners.forEach(l => l(command));
         }
-
         this.breakCurrentCommand();
     }
 
