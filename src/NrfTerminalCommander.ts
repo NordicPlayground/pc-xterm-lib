@@ -211,9 +211,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     /**
      * Removes the command currently being entered into the buffer
      * and replaces it with `newCommand`.
-     * @param newCommand The command to write to the screen.
+     * @param newCommand The command to write to the screen. Defaults to an empty string.
      */
-    public replaceInputWith(newCommand: string): void {
+    public replaceInputWith(newCommand: string = ''): void {
         this.clearInput();
         this.#terminal.write(newCommand);
         this._output = newCommand;
