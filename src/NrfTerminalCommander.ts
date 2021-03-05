@@ -178,8 +178,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * Registers all custom commands from the provided config
      */
     private registerCustomCommands(): void {
-        for (const [command, callback] of Object.entries(this.#config.commands)) {
-            this.registerCommand(command, callback)
+        for (const [command, callback] of Object.entries(
+            this.#config.commands
+        )) {
+            this.registerCommand(command, callback);
         }
     }
 
@@ -189,11 +191,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @param listener The function to call when the output changes.
      * @returns a function to unregister the listener
      */
-    public registerOutputListener(listener: (output: string) => void): () => void {
+    public registerOutputListener(
+        listener: (output: string) => void
+    ): () => void {
         this.#outputListeners.push(listener);
 
         return () =>
-            this.#outputListeners = this.#outputListeners.filter(l => l !== listener);
+            (this.#outputListeners = this.#outputListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
@@ -202,11 +208,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @param listener The function to call when a command is run.
      * @returns a function to unregister the listener
      */
-    public registerRunCommandListener(listener: (command: string) => void): () => void {
+    public registerRunCommandListener(
+        listener: (command: string) => void
+    ): () => void {
         this.#runCommandListeners.push(listener);
 
         return () =>
-            this.#runCommandListeners = this.#runCommandListeners.filter(l => l !== listener);
+            (this.#runCommandListeners = this.#runCommandListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
