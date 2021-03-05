@@ -85,11 +85,25 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      */
     private registerCommand;
     /**
+     * Registers all custom commands from the provided config
+     */
+    private registerCustomCommands;
+    /**
      * Registers a function that will be called whenever the output changes,
      * with the new output value.
      * @param listener The function to call when the output changes.
      */
     registerOutputListener(listener: (output: string) => void): void;
+    /**
+     * Registers a function that will be called whenever the a command is run,
+     * with the command value.
+     * @param listener The function to call when a command is run.
+     */
+    registerRunCommandListener(listener: (command: string) => void): void;
+    /**
+     * Removes all functions that are called whenever a command is run
+     */
+    clearRunCommandListeners(): void;
     /**
      * Removes the command currently being entered into the buffer
      * and replaces it with `newCommand`.
@@ -115,7 +129,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     private backspace;
     private moveCaretLeft;
     private moveCaretRight;
-    private runCommand;
+    runCommand(cmd?: string): void;
     /**
      * Prints a new prompt and removes the currently entered
      * text. Useful whenever a new line of input needs to be
