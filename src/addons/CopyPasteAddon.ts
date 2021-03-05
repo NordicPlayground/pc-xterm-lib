@@ -28,7 +28,7 @@ export default class CopyPasteAddon extends NrfTerminalAddon {
                         this.terminal.paste(line);
                         this.commander.runCommand(line.trim());
                     });
-                    this.commander.replaceInputWith(remainder);
+                    this.commander.replaceUserInput(remainder);
                 });
             }
         });

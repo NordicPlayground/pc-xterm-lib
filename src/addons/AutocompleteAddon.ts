@@ -6,7 +6,7 @@ export interface Completion {
     description: string;
 }
 
-export type CompleterFunction = (output: string) => Completion[];
+export type CompleterFunction = (userInput: string) => Completion[];
 
 const HIGHLIGHTED_CLASS = 'autocomplete__suggestion--highlighted';
 
@@ -19,7 +19,7 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     #container?: HTMLUListElement;
     #completerFunction: CompleterFunction;
     #highlightedIndex = 0;
-    #prevOutput = '';
+    #prevUserInput = '';
     #hasCancelled = false;
 
     constructor(commander: NrfTerminalCommander, completer: CompleterFunction) {
@@ -40,18 +40,18 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     }
 
     private get completions(): Completion[] {
-        return this.#completerFunction(this.commander.output);
+        return this.#completerFunction(this.commander.userInput);
     }
 
     protected onActivate() {
-        this.commander.registerOutputListener(output => {
+        this.commander.registerUserInputChangeListener(userInput => {
             if (!this.#container) {
                 this.initialiseContainer();
             }
 
             if (!this.#hasCancelled) {
-                this.patchSuggestionBox(output);
-                this.repositionX(output);
+                this.patchSuggestionBox(userInput);
+                this.repositionX(userInput);
                 this.repositionY(this.commander.lineCount);
             }
         });
@@ -118,48 +118,48 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     private selectSuggestion(id: number): void {
         const { value } = this.completions[id];
         // Write out the portion of the value that hasn't already been typed.
-        const completed = value.slice(this.commander.output.length);
+        const completed = value.slice(this.commander.userInput.length);
         this.terminal.write(completed);
         this.clearSuggestions();
     }
 
-    private patchSuggestionBox(output: string): void {
-        if (!output.length) {
+    private patchSuggestionBox(userInput: string): void {
+        if (!userInput.length) {
             this.clearSuggestions();
             return;
         }
 
         for (let i = 0; i < this.completions.length; i += 1) {
             const completion = this.completions[i];
-            const isMatch = completion.value.startsWith(output);
+            const isMatch = completion.value.startsWith(userInput);
             const alreadyShowing = this.#suggestions.includes(i);
 
             if (isMatch && alreadyShowing) {
-                if (output.length < this.#prevOutput.length) {
+                if (userInput.length < this.#prevUserInput.length) {
                     this.shrinkMatch(i);
                 } else {
                     this.growMatch(i);
                 }
             } else if (isMatch && !alreadyShowing) {
-                this.addSuggestion(i, output);
+                this.addSuggestion(i, userInput);
             } else if (!isMatch && alreadyShowing) {
                 this.removeSuggestion(i);
             }
         }
 
-        this.#prevOutput = output;
+        this.#prevUserInput = userInput;
     }
 
-    private addSuggestion(id: number, output: string): void {
+    private addSuggestion(id: number, userInput: string): void {
         const { value: suggestionValue } = this.completions[id];
 
         const matchedSpan = document.createElement('span');
-        matchedSpan.textContent = output;
+        matchedSpan.textContent = userInput;
         matchedSpan.className = 'font-weight-bolder';
         matchedSpan.dataset.type = 'matched';
 
         const unmatchedSpan = document.createElement('span');
-        const regex = new RegExp(`^${output}`, 'gm');
+        const regex = new RegExp(`^${userInput}`, 'gm');
         const unmatchedFragment = suggestionValue.split(regex)[1];
         unmatchedSpan.textContent = unmatchedFragment;
         unmatchedSpan.dataset.type = 'unmatched';
@@ -228,8 +228,9 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
         return suggestionLi as HTMLLIElement;
     }
 
-    private repositionX(output: string): void {
-        const left = output.length * 3.5 + 80 + (5 * output.length - 1) - 3.5;
+    private repositionX(userInput: string): void {
+        const left =
+            userInput.length * 3.5 + 80 + (5 * userInput.length - 1) - 3.5;
         this.#root!.style.left = `${left}px`;
     }
 
