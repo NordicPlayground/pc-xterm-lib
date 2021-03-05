@@ -85,6 +85,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      */
     private registerCommand;
     /**
+     * Registers all custom commands from the provided config
+     */
+    private registerCustomCommands;
+    /**
      * Registers a function that will be called whenever the output changes,
      * with the new output value.
      * @param listener The function to call when the output changes.
