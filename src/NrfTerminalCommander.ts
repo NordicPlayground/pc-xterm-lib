@@ -187,25 +187,26 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * Registers a function that will be called whenever the output changes,
      * with the new output value.
      * @param listener The function to call when the output changes.
+     * @returns a function to unregister the listener
      */
-    public registerOutputListener(listener: (output: string) => void): void {
+    public registerOutputListener(listener: (output: string) => void): () => void {
         this.#outputListeners.push(listener);
+
+        return () =>
+            this.#outputListeners = this.#outputListeners.filter(l => l !== listener);
     }
 
     /**
      * Registers a function that will be called whenever the a command is run,
      * with the command value.
      * @param listener The function to call when a command is run.
+     * @returns a function to unregister the listener
      */
-    public registerRunCommandListener(listener: (command: string) => void): void {
+    public registerRunCommandListener(listener: (command: string) => void): () => void {
         this.#runCommandListeners.push(listener);
-    }
 
-    /**
-     * Removes all functions that are called whenever a command is run
-     */
-    public clearRunCommandListeners(): void {
-        this.#runCommandListeners = [];
+        return () =>
+            this.#runCommandListeners = this.#runCommandListeners.filter(l => l !== listener);
     }
 
     /**
