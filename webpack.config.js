@@ -10,7 +10,6 @@ const config = {
         libraryTarget:'var',
         path: path.join(__dirname, 'dist'),
     },
-    devtool:'source-map',
     resolve: {
         extensions: ['.ts', '.js'],
     },
