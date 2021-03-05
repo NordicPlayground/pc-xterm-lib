@@ -21,7 +21,15 @@ export default class CopyPasteAddon extends NrfTerminalAddon {
             }
 
             if (isPaste(domEvent)) {
-                document.execCommand('paste');
+                navigator.clipboard.readText().then(clipText => {
+                    const lines = clipText.split('\n');
+                    const remainder = lines.pop()!;
+                    lines.forEach(line => {
+                        this.terminal.paste(line);
+                        this.commander.runCommand(line.trim());
+                    });
+                    this.commander.replaceInputWith(remainder)
+                });
             }
         });
     }
