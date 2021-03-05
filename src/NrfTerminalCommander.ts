@@ -18,6 +18,7 @@ export interface KeyEvent {
 }
 
 export type OutputListener = (output: string) => void;
+export type RunCommandListener = (command: string) => void;
 
 export interface NrfTerminalConfig {
     /**
@@ -84,7 +85,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     #registeredCommands: { [command: string]: () => void } = {};
     #outputListeners: OutputListener[] = [];
-    #runCommandListeners: ((command: string) => void)[] = [];
+    #runCommandListeners: RunCommandListener[] = [];
 
     constructor(config: NrfTerminalConfig) {
         this.#config = config;
@@ -191,9 +192,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @param listener The function to call when the output changes.
      * @returns a function to unregister the listener
      */
-    public registerOutputListener(
-        listener: (output: string) => void
-    ): () => void {
+    public registerOutputListener(listener: OutputListener): () => void {
         this.#outputListeners.push(listener);
 
         return () =>
@@ -209,7 +208,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * @returns a function to unregister the listener
      */
     public registerRunCommandListener(
-        listener: (command: string) => void
+        listener: RunCommandListener
     ): () => void {
         this.#runCommandListeners.push(listener);
 
