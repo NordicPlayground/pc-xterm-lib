@@ -6,10 +6,11 @@ const config = {
     target: 'web',
     output: {
         filename: 'index.js',
-        library: 'pcXtermLib',
-        libraryTarget:'umd',
+        library: 'PcXtermLib',
+        libraryTarget:'var',
         path: path.join(__dirname, 'dist'),
     },
+    devtool:'source-map',
     resolve: {
         extensions: ['.ts', '.js'],
     },
