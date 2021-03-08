@@ -8,12 +8,15 @@ export default class HistoryAddon extends NrfTerminalAddon {
     #currentIndex = -1;
 
     protected onActivate(): void {
+        this.commander.onRunCommand((command) => {
+            this.addToHistory(command);
+        })
+
         this.terminal.onData(data => {
             if (
                 charCode(data) === CharCodes.LF &&
                 this.commander.userInput.trim().length
             ) {
-                this.addToHistory(this.commander.userInput);
                 this.resetCursor();
             }
         });
