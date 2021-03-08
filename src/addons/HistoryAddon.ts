@@ -36,9 +36,11 @@ export default class HistoryAddon extends NrfTerminalAddon {
     }
 
     private addToHistory(command: string): void {
-        if (command.length && charCode(command) !== CharCodes.LF) {
-            this.#history.unshift(command);
+        const latestEntry = this.#history[0];
+        if (latestEntry === command || command.trim() === '') {
+            return;
         }
+        this.#history.unshift(command);
     }
 
     private moveForwards(): void {
