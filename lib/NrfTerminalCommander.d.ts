@@ -6,18 +6,19 @@ export interface KeyEvent {
     key: string;
     domEvent: KeyboardEvent;
 }
-export declare type OutputListener = (output: string) => void;
+export declare type UserInputChangeListener = (userInput: string) => void;
+export declare type RunCommandListener = (command: string) => void;
 export interface NrfTerminalConfig {
     /**
      * The string to be displayed at the start of each new line.
      */
     prompt: string;
     /**
-     * A function that, given the current output, returns the list
+     * A function that, given the current user input, returns the list
      * of autocompletion entries that should be displayed.
      *
      * @example
-     * function completer(output: string) {
+     * function completer(userInput: string) {
      *   const completions: Completion[] = [
      *      {
      *        value: "toggle_autcomplete",
@@ -25,7 +26,7 @@ export interface NrfTerminalConfig {
      *      }
      *   ];
      *
-     *   return completions.filter(c => c.value.beginsWith(output));
+     *   return completions.filter(c => c.value.beginsWith(userInput));
      * }
      */
     completerFunction: CompleterFunction;
@@ -67,10 +68,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     activate(terminal: Terminal): void;
     dispose(): boolean;
     /**
-     * The value of the current line.
+     * The current user input.
      */
-    get output(): string;
-    private set _output(value);
+    get userInput(): string;
+    private set _userInput(value);
     /**
      * The number of lines spanned by the current command.
      */
@@ -89,27 +90,24 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      */
     private registerCustomCommands;
     /**
-     * Registers a function that will be called whenever the output changes,
-     * with the new output value.
-     * @param listener The function to call when the output changes.
+     * Registers a function that will be called whenever the user input changes,
+     * with the new user input.
+     * @param listener The function to call when the user input changes.
+     * @returns a function to unregister the listener
      */
-    registerOutputListener(listener: (output: string) => void): void;
+    onUserInputChange(listener: UserInputChangeListener): () => void;
     /**
      * Registers a function that will be called whenever the a command is run,
      * with the command value.
      * @param listener The function to call when a command is run.
+     * @returns a function to unregister the listener
      */
-    registerRunCommandListener(listener: (command: string) => void): void;
+    onRunCommand(listener: RunCommandListener): () => void;
     /**
-     * Removes all functions that are called whenever a command is run
+     * Replaces the user input currently being entered into the buffer.
+     * @param newUserInput The user input written to the screen. Defaults to an empty string.
      */
-    clearRunCommandListeners(): void;
-    /**
-     * Removes the command currently being entered into the buffer
-     * and replaces it with `newCommand`.
-     * @param newCommand The command to write to the screen.
-     */
-    replaceInputWith(newCommand: string): void;
+    replaceUserInput(newUserInput?: string): void;
     /**
      * Returns `true` if the cursor is placed at the beginning of
      * the line (i.e. right after the prompt), otherwise `false`.
@@ -125,7 +123,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * Removes all the typed characters on the current line, and
      * moves the cursor to the beginning.
      */
-    clearInput(): void;
+    clearUserInput(): void;
     private backspace;
     private moveCaretLeft;
     private moveCaretRight;

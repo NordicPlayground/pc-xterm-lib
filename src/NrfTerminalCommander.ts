@@ -17,7 +17,8 @@ export interface KeyEvent {
     domEvent: KeyboardEvent;
 }
 
-export type OutputListener = (output: string) => void;
+export type UserInputChangeListener = (userInput: string) => void;
+export type RunCommandListener = (command: string) => void;
 
 export interface NrfTerminalConfig {
     /**
@@ -25,11 +26,11 @@ export interface NrfTerminalConfig {
      */
     prompt: string;
     /**
-     * A function that, given the current output, returns the list
+     * A function that, given the current user input, returns the list
      * of autocompletion entries that should be displayed.
      *
      * @example
-     * function completer(output: string) {
+     * function completer(userInput: string) {
      *   const completions: Completion[] = [
      *      {
      *        value: "toggle_autcomplete",
@@ -37,7 +38,7 @@ export interface NrfTerminalConfig {
      *      }
      *   ];
      *
-     *   return completions.filter(c => c.value.beginsWith(output));
+     *   return completions.filter(c => c.value.beginsWith(userInput));
      * }
      */
     completerFunction: CompleterFunction;
@@ -80,11 +81,11 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     #lineSpan = 0;
     #lineCount = 1;
-    #outputValue = '';
+    #userInput = '';
 
     #registeredCommands: { [command: string]: () => void } = {};
-    #outputListeners: OutputListener[] = [];
-    #runCommandListeners: ((command: string) => void)[] = [];
+    #userInputChangeListeners: UserInputChangeListener[] = [];
+    #runCommandListeners: RunCommandListener[] = [];
 
     constructor(config: NrfTerminalConfig) {
         this.#config = config;
@@ -138,15 +139,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     /**
-     * The value of the current line.
+     * The current user input.
      */
-    public get output() {
-        return this.#outputValue;
+    public get userInput() {
+        return this.#userInput;
     }
 
-    private set _output(newOutput: string) {
-        this.#outputValue = newOutput;
-        this.#outputListeners.forEach(l => l(this.output));
+    private set _userInput(newUserInput: string) {
+        this.#userInput = newUserInput;
+        this.#userInputChangeListeners.forEach(l => l(this.userInput));
     }
 
     /**
@@ -178,45 +179,51 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * Registers all custom commands from the provided config
      */
     private registerCustomCommands(): void {
-        for (const [command, callback] of Object.entries(this.#config.commands)) {
-            this.registerCommand(command, callback)
+        for (const [command, callback] of Object.entries(
+            this.#config.commands
+        )) {
+            this.registerCommand(command, callback);
         }
     }
 
     /**
-     * Registers a function that will be called whenever the output changes,
-     * with the new output value.
-     * @param listener The function to call when the output changes.
+     * Registers a function that will be called whenever the user input changes,
+     * with the new user input.
+     * @param listener The function to call when the user input changes.
+     * @returns a function to unregister the listener
      */
-    public registerOutputListener(listener: (output: string) => void): void {
-        this.#outputListeners.push(listener);
+    public onUserInputChange(listener: UserInputChangeListener): () => void {
+        this.#userInputChangeListeners.push(listener);
+
+        return () =>
+            (this.#userInputChangeListeners = this.#userInputChangeListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
      * Registers a function that will be called whenever the a command is run,
      * with the command value.
      * @param listener The function to call when a command is run.
+     * @returns a function to unregister the listener
      */
-    public registerRunCommandListener(listener: (command: string) => void): void {
+    public onRunCommand(listener: RunCommandListener): () => void {
         this.#runCommandListeners.push(listener);
+
+        return () =>
+            (this.#runCommandListeners = this.#runCommandListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
-     * Removes all functions that are called whenever a command is run
+     * Replaces the user input currently being entered into the buffer.
+     * @param newUserInput The user input written to the screen. Defaults to an empty string.
      */
-    public clearRunCommandListeners(): void {
-        this.#runCommandListeners = [];
-    }
-
-    /**
-     * Removes the command currently being entered into the buffer
-     * and replaces it with `newCommand`.
-     * @param newCommand The command to write to the screen.
-     */
-    public replaceInputWith(newCommand: string): void {
-        this.clearInput();
-        this.#terminal.write(newCommand);
-        this._output = newCommand;
+    public replaceUserInput(newUserInput: string = ''): void {
+        this.clearUserInput();
+        this.#terminal.write(newUserInput);
+        this._userInput = newUserInput;
     }
 
     /**
@@ -234,7 +241,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * otherwise `false`.
      */
     public atEndOfLine(): boolean {
-        const maxRightCursor = this.#prompt.length - 2 + this.output.length;
+        const maxRightCursor = this.#prompt.length - 2 + this.userInput.length;
         const buffer = this.#terminal.buffer.active;
         return buffer.cursorX >= maxRightCursor;
     }
@@ -243,8 +250,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * Removes all the typed characters on the current line, and
      * moves the cursor to the beginning.
      */
-    public clearInput(): void {
-        const charsToDelete = this.output.length - 1;
+    public clearUserInput(): void {
+        const charsToDelete = this.userInput.length - 1;
         for (let i = 0; i <= charsToDelete; i += 1) {
             this.backspace();
         }
@@ -253,7 +260,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     private backspace(): void {
         if (!this.atBeginningOfLine()) {
             this.#terminal.write('\b \b');
-            this._output = this.output.slice(0, this.output.length - 1);
+            this._userInput = this.userInput.slice(
+                0,
+                this.userInput.length - 1
+            );
         }
     }
 
@@ -270,7 +280,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     public runCommand(cmd?: string): void {
-        const command = cmd || this.output.trim();
+        const command = cmd || this.userInput.trim();
         if (command.length) {
             const callback = this.#registeredCommands[command];
             if (callback) {
@@ -290,7 +300,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#lineCount += 1;
         this.#terminal.write(this.#prompt.value);
         this.#historyAddon.resetCursor();
-        this._output = '';
+        this._userInput = '';
     }
 
     private onData(data: string): void {
@@ -308,7 +318,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
                 }
         }
 
-        this._output = this.output + data;
+        this._userInput = this.userInput + data;
         this.updateLineSpan();
         this.autocompleteAddon.enable();
         this.#terminal.write(data);
@@ -337,6 +347,6 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     private updateLineSpan() {
         const delta = this.#terminal.cols - this.#prompt.length;
-        this.#lineSpan = Math.floor(this.output.length / delta);
+        this.#lineSpan = Math.floor(this.userInput.length / delta);
     }
 }
