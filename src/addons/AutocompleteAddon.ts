@@ -117,9 +117,7 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
 
     private selectSuggestion(id: number): void {
         const { value } = this.completions[id];
-        // Write out the portion of the value that hasn't already been typed.
-        const completed = value.slice(this.commander.userInput.length);
-        this.terminal.write(completed);
+        this.commander.replaceUserInput(value);
         this.clearSuggestions();
     }
 
