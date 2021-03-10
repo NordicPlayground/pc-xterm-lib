@@ -251,10 +251,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      * moves the cursor to the beginning.
      */
     public clearUserInput(): void {
-        const charsToDelete = this.userInput.length - 1;
-        for (let i = 0; i <= charsToDelete; i += 1) {
-            this.backspace();
-        }
+        this.#terminal.write(ansi.cursorTo(this.#prompt.length - 2));
+        this.#terminal.write(ansi.eraseEndLine);
     }
 
     private backspace(): void {
