@@ -13,7 +13,6 @@ const HIGHLIGHTED_CLASS = 'autocomplete__suggestion--highlighted';
 export default class AutocompleteAddon extends NrfTerminalAddon {
     name = 'AutocompleteAddon';
 
-    #isVisible = false;
     #suggestions: number[] = [];
     #root?: HTMLDivElement;
     #container?: HTMLUListElement;
@@ -28,7 +27,7 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     }
 
     public get isVisible() {
-        return this.#isVisible;
+        return this.#suggestions.length > 0;
     }
 
     public disable() {
@@ -59,16 +58,14 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
         this.terminal.onKey(({ domEvent }) => {
             switch (domEvent.code) {
                 case 'ArrowUp':
-                    return this.navigateUp();
+                    if (this.isVisible) return this.navigateUp();
                 case 'ArrowDown':
-                    return this.navigateDown();
+                    if (this.isVisible) return this.navigateDown();
                 case 'Escape':
                     this.#hasCancelled = true;
                     return this.clearSuggestions();
                 case 'Enter':
-                    if (this.isVisible) {
-                        return this.selectSuggestion(this.#highlightedIndex);
-                    }
+                    if (this.isVisible) return this.selectSuggestion(this.#highlightedIndex);
                 // Swallow backspace keys so they don't revert the cancel.
                 // This way the dialog will only appear again on a real keypress.
                 case 'Backspace':
@@ -174,7 +171,6 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
 
         this.#container?.appendChild(suggestionLi);
         this.#suggestions.push(id);
-        this.#isVisible = true;
     }
 
     private removeSuggestion(id: number): void {
@@ -210,7 +206,6 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
         if (!this.#container) return;
         this.#container.innerHTML = '';
         this.#suggestions = [];
-        this.#isVisible = false;
         this.#highlightedIndex = 0;
     }
 
