@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const config = {
     entry: './src/index.ts',
     target: 'web',
+    devtool:'source-map',
     output: {
         filename: 'index.js',
         library: 'PcXtermLib',
