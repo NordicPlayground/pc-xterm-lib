@@ -48,7 +48,7 @@ export default class TimestampAddon extends NrfTerminalAddon {
 
         const endCols =
             this.terminal.cols -
-            this.commander.output.length -
+            this.commander.userInput.length -
             formatted.length -
             this.commander.prompt.length;
 

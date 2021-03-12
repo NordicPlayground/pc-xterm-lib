@@ -8,12 +8,15 @@ export default class HistoryAddon extends NrfTerminalAddon {
     #currentIndex = -1;
 
     protected onActivate(): void {
+        this.commander.onRunCommand((command) => {
+            this.addToHistory(command);
+        })
+
         this.terminal.onData(data => {
             if (
                 charCode(data) === CharCodes.LF &&
-                this.commander.output.trim().length
+                this.commander.userInput.trim().length
             ) {
-                this.addToHistory(this.commander.output);
                 this.resetCursor();
             }
         });
@@ -33,22 +36,24 @@ export default class HistoryAddon extends NrfTerminalAddon {
     }
 
     private addToHistory(command: string): void {
-        if (command.length && charCode(command) !== CharCodes.LF) {
-            this.#history.unshift(command);
+        const latestEntry = this.#history[0];
+        if (latestEntry === command || command.trim() === '') {
+            return;
         }
+        this.#history.unshift(command);
     }
 
     private moveForwards(): void {
         if (this.#currentIndex < 0) return;
         this.#currentIndex -= 1;
         const command = this.#currentIndex === -1 ? '' : this.currentCommand;
-        this.commander.replaceInputWith(command);
+        this.commander.replaceUserInput(command);
     }
 
     private moveBackwards(): void {
         if (this.#currentIndex >= this.history.length - 1) return;
         this.#currentIndex += 1;
-        this.commander.replaceInputWith(this.currentCommand);
+        this.commander.replaceUserInput(this.currentCommand);
     }
 
     /**

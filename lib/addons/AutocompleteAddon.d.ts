@@ -4,7 +4,7 @@ export interface Completion {
     value: string;
     description: string;
 }
-export declare type CompleterFunction = (output: string) => Completion[];
+export declare type CompleterFunction = (userInput: string) => Completion[];
 export default class AutocompleteAddon extends NrfTerminalAddon {
     #private;
     name: string;
