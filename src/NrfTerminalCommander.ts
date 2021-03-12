@@ -278,7 +278,6 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     public runCommand(cmd?: string): void {
-        this.breakCurrentCommand();
         const command = cmd || this.userInput.trim();
         if (command.length) {
             const callback = this.#registeredCommands[command];
@@ -287,6 +286,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
             }
             this.#runCommandListeners.forEach(l => l(command));
         }
+        this.breakCurrentCommand();
     }
 
     /**
