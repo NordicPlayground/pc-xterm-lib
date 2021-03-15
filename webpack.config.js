@@ -4,10 +4,11 @@ const webpack = require('webpack');
 const config = {
     entry: './src/index.ts',
     target: 'web',
+    devtool: 'source-map',
     output: {
         filename: 'index.js',
         library: 'PcXtermLib',
-        libraryTarget:'var',
+        libraryTarget: 'var',
         path: path.join(__dirname, 'dist'),
     },
     resolve: {
@@ -16,9 +17,9 @@ const config = {
     plugins: [
         // fix "process is not defined" error
         new webpack.ProvidePlugin({
-          process: 'process/browser',
+            process: 'process/browser',
         }),
-      ],
+    ],
     module: {
         rules: [
             {
