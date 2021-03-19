@@ -53,6 +53,16 @@ export interface NrfTerminalConfig {
      * }
      */
     commands: { [name: string]: () => void };
+    /**
+     * A function that handles all user input not specified in `commands`.
+     * Can be omitted if no such handling is desired.
+     * 
+     * @example
+     * unspecifiedCommandHandler(userInput: string): void {
+     *   console.log(`Unrecognized command: ${userInput}`)
+     * }
+     */
+    unspecifiedCommandHandler?: (userInput: string) => void;
     hoverMetadata: HoverMetadata[];
     /**
      * Whether or not timestamps should be displayed after each command
@@ -196,9 +206,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#userInputChangeListeners.push(listener);
 
         return () =>
-            (this.#userInputChangeListeners = this.#userInputChangeListeners.filter(
-                l => l !== listener
-            ));
+        (this.#userInputChangeListeners = this.#userInputChangeListeners.filter(
+            l => l !== listener
+        ));
     }
 
     /**
@@ -211,9 +221,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#runCommandListeners.push(listener);
 
         return () =>
-            (this.#runCommandListeners = this.#runCommandListeners.filter(
-                l => l !== listener
-            ));
+        (this.#runCommandListeners = this.#runCommandListeners.filter(
+            l => l !== listener
+        ));
     }
 
     /**
@@ -279,14 +289,16 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     public runCommand(cmd?: string): void {
         const command = cmd || this.userInput.trim();
+        this.breakCurrentCommand();
         if (command.length) {
             const callback = this.#registeredCommands[command];
             if (callback) {
                 callback();
+            } else if (this.#config.unspecifiedCommandHandler) {
+                this.#config.unspecifiedCommandHandler(command);
             }
             this.#runCommandListeners.forEach(l => l(command));
         }
-        this.breakCurrentCommand();
     }
 
     /**
