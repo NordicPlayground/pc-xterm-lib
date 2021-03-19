@@ -43,6 +43,16 @@ export interface NrfTerminalConfig {
     commands: {
         [name: string]: () => void;
     };
+    /**
+     * A function that handles all user input not specified in `commands`.
+     * Can be omitted if no such handling is desired.
+     *
+     * @example
+     * unspecifiedCommandHandler(userInput: string): void {
+     *   console.log(`Unrecognized command: ${userInput}`)
+     * }
+     */
+    unspecifiedCommandHandler?: (userInput: string) => void;
     hoverMetadata: HoverMetadata[];
     /**
      * Whether or not timestamps should be displayed after each command
