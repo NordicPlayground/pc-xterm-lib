@@ -92,6 +92,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     #lineSpan = 0;
     #lineCount = 1;
     #userInput = '';
+    #cursorInputIndex = 0;
 
     #registeredCommands: { [command: string]: () => void } = {};
     #userInputChangeListeners: UserInputChangeListener[] = [];
@@ -158,6 +159,14 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     private set _userInput(newUserInput: string) {
         this.#userInput = newUserInput;
         this.#userInputChangeListeners.forEach(l => l(this.userInput));
+    }
+
+    public get cursorInputIndex() {
+        return this.#cursorInputIndex;
+    }
+
+    private set _cursorInputIndex(newCursorInputIndex: number) {
+        this.#cursorInputIndex = newCursorInputIndex;
     }
 
     /**
@@ -233,6 +242,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     public replaceUserInput(newUserInput: string = ''): void {
         this.clearUserInput();
         this.#terminal.write(newUserInput);
+        this._cursorInputIndex = newUserInput.length;
         this._userInput = newUserInput;
     }
 
@@ -263,27 +273,40 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     public clearUserInput(): void {
         this.#terminal.write(ansi.cursorTo(this.#prompt.length - 2));
         this.#terminal.write(ansi.eraseEndLine);
+        this._cursorInputIndex = 0;
     }
 
     private backspace(): void {
         if (!this.atBeginningOfLine()) {
-            this.#terminal.write('\b \b');
-            this._userInput = this.userInput.slice(
-                0,
-                this.userInput.length - 1
-            );
+            if (this.atEndOfLine()) {
+                this.#terminal.write('\b \b');
+                this._cursorInputIndex = this.cursorInputIndex-1;
+                this._userInput = this.userInput.slice(
+                    0,
+                    this.userInput.length - 1
+                );
+            }
+            else {
+                const newUserInput = this.userInput.substring(0,this.cursorInputIndex-1) + this.userInput.substring(this.cursorInputIndex);
+                const oldCursorInputIndex = this.cursorInputIndex;
+                this.replaceUserInput(newUserInput);
+                this._cursorInputIndex = oldCursorInputIndex - 1;
+                this.setCursorToIndex(this.cursorInputIndex);
+            }
         }
     }
 
     private moveCaretLeft(): void {
         if (!this.atBeginningOfLine()) {
-            this.#terminal.write(ansi.cursorBackward(1));
+            this._cursorInputIndex = this.cursorInputIndex - 1;
+            this.setCursorToIndex(this.cursorInputIndex);
         }
     }
 
     private moveCaretRight(): void {
         if (!this.atEndOfLine()) {
-            this.#terminal.write(ansi.cursorForward(1));
+            this._cursorInputIndex = this.cursorInputIndex + 1;
+            this.setCursorToIndex(this.cursorInputIndex);
         }
     }
 
@@ -311,6 +334,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#terminal.write(this.#prompt.value);
         this.#historyAddon.resetCursor();
         this._userInput = '';
+        this._cursorInputIndex = 0;
     }
 
     private onData(data: string): void {
@@ -328,10 +352,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
                 }
         }
 
-        this._userInput = this.userInput + data;
+        this.updateUserInput(data);
         this.updateLineSpan();
         this.autocompleteAddon.enable();
-        this.#terminal.write(data);
     }
 
     private onKey(e: KeyEvent): void {
@@ -358,5 +381,17 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     private updateLineSpan() {
         const delta = this.#terminal.cols - this.#prompt.length;
         this.#lineSpan = Math.floor(this.userInput.length / delta);
+    }
+
+    private setCursorToIndex(index: number) {
+        this.#terminal.write(ansi.cursorTo(this.#prompt.length - 2 + index));
+    }
+
+    private updateUserInput(data: string) {
+        const newUserInput = this.userInput.substring(0,this.cursorInputIndex) + data + this.userInput.substring(this.cursorInputIndex);
+        const oldCursorInputIndex = this.cursorInputIndex;
+        this.replaceUserInput(newUserInput);
+        this._cursorInputIndex = oldCursorInputIndex + data.length;
+        this.setCursorToIndex(this.cursorInputIndex);
     }
 }
