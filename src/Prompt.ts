@@ -6,7 +6,7 @@ export default class Prompt {
     #commander: TerminalCommander;
 
     constructor(commander: TerminalCommander, template: string) {
-        this.#template = `\n\r${template} `;
+        this.#template = `\n\r${template}`;
         this.#commander = commander;
     }
 
