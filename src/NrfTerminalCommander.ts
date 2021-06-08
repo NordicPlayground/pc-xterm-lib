@@ -24,7 +24,7 @@ export interface NrfTerminalConfig {
     /**
      * The string to be displayed at the start of each new line.
      */
-    prompt: string;
+    prompt?: string;
     /**
      * A function that, given the current user input, returns the list
      * of autocompletion entries that should be displayed.
@@ -56,7 +56,7 @@ export interface NrfTerminalConfig {
     /**
      * A function that handles all user input not specified in `commands`.
      * Can be omitted if no such handling is desired.
-     * 
+     *
      * @example
      * unspecifiedCommandHandler(userInput: string): void {
      *   console.log(`Unrecognized command: ${userInput}`)
@@ -100,7 +100,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     constructor(config: NrfTerminalConfig) {
         this.#config = config;
-        this.#prompt = new Prompt(this, config.prompt);
+        this.#prompt = new Prompt(this, config.prompt || '');
     }
 
     public activate(terminal: Terminal) {
@@ -280,14 +280,12 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         if (!this.atBeginningOfLine()) {
             if (this.atEndOfLine()) {
                 this.#terminal.write('\b \b');
-                this._cursorInputIndex = this.cursorInputIndex-1;
-                this._userInput = this.userInput.slice(
-                    0,
-                    this.userInput.length - 1
-                );
+                this._cursorInputIndex = this.cursorInputIndex - 1;
+                this._userInput = this.userInput.slice(0, this.userInput.length - 1);
             }
             else {
-                const newUserInput = this.userInput.substring(0,this.cursorInputIndex-1) + this.userInput.substring(this.cursorInputIndex);
+                const newUserInput = this.userInput.substring(0, this.cursorInputIndex - 1)
+                    + this.userInput.substring(this.cursorInputIndex);
                 const oldCursorInputIndex = this.cursorInputIndex;
                 this.replaceUserInput(newUserInput);
                 this._cursorInputIndex = oldCursorInputIndex - 1;
@@ -388,7 +386,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     private updateUserInput(data: string) {
-        const newUserInput = this.userInput.substring(0,this.cursorInputIndex) + data + this.userInput.substring(this.cursorInputIndex);
+        const newUserInput = this.userInput.substring(0, this.cursorInputIndex)
+            + data + this.userInput.substring(this.cursorInputIndex);
         const oldCursorInputIndex = this.cursorInputIndex;
         this.replaceUserInput(newUserInput);
         this._cursorInputIndex = oldCursorInputIndex + data.length;

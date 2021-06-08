@@ -12,7 +12,7 @@ export interface NrfTerminalConfig {
     /**
      * The string to be displayed at the start of each new line.
      */
-    prompt: string;
+    prompt?: string;
     /**
      * A function that, given the current user input, returns the list
      * of autocompletion entries that should be displayed.
@@ -82,6 +82,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
      */
     get userInput(): string;
     private set _userInput(value);
+    get cursorInputIndex(): number;
+    private set _cursorInputIndex(value);
     /**
      * The number of lines spanned by the current command.
      */
@@ -147,4 +149,6 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     private onData;
     private onKey;
     private updateLineSpan;
+    private setCursorToIndex;
+    private updateUserInput;
 }
