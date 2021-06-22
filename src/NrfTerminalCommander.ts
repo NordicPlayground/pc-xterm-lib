@@ -1,4 +1,4 @@
-import { Terminal, ITerminalAddon } from 'xterm';
+import { Terminal, ITerminalAddon, IDisposable } from 'xterm';
 import * as ansi from 'ansi-escapes';
 
 import Prompt from './Prompt';
@@ -19,6 +19,11 @@ export interface KeyEvent {
 
 export type UserInputChangeListener = (userInput: string) => void;
 export type RunCommandListener = (command: string) => void;
+export type TerminalMode =
+    | { type: 'character'; onData: (data: string) => void; onKey: (key: KeyEvent) => void }
+    | { type: 'line' };
+
+const defaultTerminalMode: TerminalMode = { type: 'line' };
 
 export interface NrfTerminalConfig {
     /**
@@ -69,6 +74,12 @@ export interface NrfTerminalConfig {
      * is run.
      */
     showTimestamps: boolean;
+
+    /**
+     * Whether to use 'line' mode where we provide a line editing and command interface over the regular xterm behaviour
+     * or leave it in 'character' mode where the onData and onKey are connected up directly by the user.
+     */
+    terminalMode?: TerminalMode;
 }
 
 /**
@@ -98,9 +109,15 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     #userInputChangeListeners: UserInputChangeListener[] = [];
     #runCommandListeners: RunCommandListener[] = [];
 
+    #keyListener: IDisposable | null;
+    #dataListener: IDisposable | null;
+
     constructor(config: NrfTerminalConfig) {
         this.#config = config;
         this.#prompt = new Prompt(this, config.prompt || '');
+
+        this.#keyListener = null;
+        this.#dataListener = null;
     }
 
     public activate(terminal: Terminal) {
@@ -131,8 +148,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         const hoverAddon = new HoverAddon(this, []);
         this.#terminal.loadAddon(hoverAddon);
 
-        this.#terminal.onKey(this.onKey.bind(this));
-        this.#terminal.onData(this.onData.bind(this));
+        this.terminalMode = this.#config.terminalMode ?? defaultTerminalMode;
 
         this.registerCommand('show_history', () => {
             console.log(historyAddon.history);
@@ -182,6 +198,29 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
     public get prompt() {
         return this.#prompt;
+    }
+
+    /**
+     * Allows moving between 'line' and 'character' mode
+     */
+    public set terminalMode(terminalMode: TerminalMode) {
+        if (this.#keyListener !== null) {
+            this.#keyListener.dispose();
+            this.#keyListener = null;
+        }
+
+        if (this.#dataListener !== null) {
+            this.#dataListener.dispose();
+            this.#dataListener = null;
+        }
+
+        if (terminalMode.type == 'character') {
+            this.#keyListener = this.#terminal.onKey(terminalMode.onKey);
+            this.#dataListener = this.#terminal.onData(terminalMode.onData);
+        } else {
+            this.#keyListener = this.#terminal.onKey(this.onKey.bind(this));
+            this.#dataListener = this.#terminal.onData(this.onData.bind(this));
+        }
     }
 
     /**
