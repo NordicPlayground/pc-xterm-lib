@@ -11,7 +11,6 @@ export declare type RunCommandListener = (command: string) => void;
 export declare type TerminalMode = {
     type: 'character';
     onData: (data: string) => void;
-    onKey: (key: KeyEvent) => void;
 } | {
     type: 'line';
 };
