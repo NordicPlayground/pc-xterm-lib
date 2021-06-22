@@ -8,6 +8,13 @@ export interface KeyEvent {
 }
 export declare type UserInputChangeListener = (userInput: string) => void;
 export declare type RunCommandListener = (command: string) => void;
+export declare type TerminalMode = {
+    type: 'character';
+    onData: (data: string) => void;
+    onKey: (key: KeyEvent) => void;
+} | {
+    type: 'line';
+};
 export interface NrfTerminalConfig {
     /**
      * The string to be displayed at the start of each new line.
@@ -59,6 +66,11 @@ export interface NrfTerminalConfig {
      * is run.
      */
     showTimestamps: boolean;
+    /**
+     * Whether to use 'line' mode where we provide a line editing and command interface over the regular xterm behaviour
+     * or leave it in 'character' mode where the onData and onKey are connected up directly by the user.
+     */
+    terminalMode?: TerminalMode;
 }
 /**
  * Contains logic and control code for the most common terminal tasks,
@@ -90,6 +102,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     get lineSpan(): number;
     get lineCount(): number;
     get prompt(): Prompt;
+    /**
+     * Allows moving between 'line' and 'character' mode
+     */
+    set terminalMode(terminalMode: TerminalMode);
     /**
      * Registers the given `command` in the terminal, such that when it is
      * executed `callback` is run.
