@@ -33,6 +33,13 @@ export default class CopyPasteAddon extends NrfTerminalAddon {
             }
         });
     }
+
+    public connect(): void {
+        // TODO: Implement
+    }
+    public disconnect(): void {
+        // TODO: Implement
+    }
 }
 
 function isCopy(e: KeyboardEvent): boolean {

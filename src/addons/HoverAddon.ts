@@ -27,4 +27,7 @@ export default class HoverAddon extends NrfTerminalAddon {
             console.log('You clicked on the special matching phrase');
         });
     }
+
+    public connect(): void {}
+    public disconnect(): void {}
 }

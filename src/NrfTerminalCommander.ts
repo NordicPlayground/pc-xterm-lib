@@ -213,9 +213,11 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         }
 
         if (terminalMode.type == 'character') {
+            this.#historyAddon.disconnect();
             // We don't need to set onKey to achieve character mode
             this.#dataListener = this.#terminal.onData(terminalMode.onData);
         } else {
+            this.#historyAddon.connect();
             this.#keyListener = this.#terminal.onKey(this.onKey.bind(this));
             this.#dataListener = this.#terminal.onData(this.onData.bind(this));
         }

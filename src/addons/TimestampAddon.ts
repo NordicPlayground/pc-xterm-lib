@@ -42,6 +42,13 @@ export default class TimestampAddon extends NrfTerminalAddon {
         });
     }
 
+    public connect(): void {
+        // TODO: Implement
+    }
+    public disconnect(): void {
+        // TODO: Implement
+    }
+
     private writeTimestamp(): void {
         const now = new Date();
         const formatted = dateFns.format(now, this.format);

@@ -1,3 +1,5 @@
+import { IDisposable } from 'xterm';
+
 import { charCode, CharCodes } from '../utils';
 import NrfTerminalAddon from '../NrfTerminalAddon';
 
@@ -7,12 +9,22 @@ export default class HistoryAddon extends NrfTerminalAddon {
     #history: string[] = [];
     #currentIndex = -1;
 
-    protected onActivate(): void {
-        this.commander.onRunCommand((command) => {
-            this.addToHistory(command);
-        })
+    #onDataListener: IDisposable | null = null;
+    #onKeyListener: IDisposable | null = null;
 
-        this.terminal.onData(data => {
+    protected onActivate(): void {
+        this.commander.onRunCommand(command => {
+            this.addToHistory(command);
+        });
+
+        this.connect();
+    }
+
+    public connect(): void {
+        // Clear all current connections
+        this.disconnect();
+
+        this.#onDataListener = this.terminal.onData(data => {
             if (
                 charCode(data) === CharCodes.LF &&
                 this.commander.userInput.trim().length
@@ -21,7 +33,7 @@ export default class HistoryAddon extends NrfTerminalAddon {
             }
         });
 
-        this.terminal.onKey(e => {
+        this.#onKeyListener = this.terminal.onKey(e => {
             if (!this.commander.autocompleteAddon.isVisible) {
                 // Don't show the autocomplete dialog when travelling through time.
                 this.commander.autocompleteAddon.disable();
@@ -33,6 +45,18 @@ export default class HistoryAddon extends NrfTerminalAddon {
                 }
             }
         });
+    }
+
+    public disconnect(): void {
+        if (this.#onDataListener !== null) {
+            this.#onDataListener.dispose();
+            this.#onDataListener = null;
+        }
+
+        if (this.#onKeyListener !== null) {
+            this.#onKeyListener.dispose();
+            this.#onKeyListener = null;
+        }
     }
 
     private addToHistory(command: string): void {

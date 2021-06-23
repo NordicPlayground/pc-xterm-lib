@@ -26,6 +26,13 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
         this.#completerFunction = completer;
     }
 
+    public connect(): void {
+        // TODO: Implement
+    }
+    public disconnect(): void {
+        // TODO: Implement
+    }
+
     public get isVisible() {
         return this.#suggestions.length > 0;
     }

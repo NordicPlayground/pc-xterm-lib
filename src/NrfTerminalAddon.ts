@@ -40,4 +40,14 @@ export default abstract class NrfTerminalAddon implements ITerminalAddon {
     public dispose() {
         console.debug(`Disposing of ${this.name}`);
     }
+
+    /**
+     * Connects up any onData and onKey handlers
+     */
+    public abstract connect(): void;
+
+    /**
+     * Disconnects any onData and onKey handlers to allow terminal to function in a pure character mode
+     */
+    public abstract disconnect(): void;
 }
