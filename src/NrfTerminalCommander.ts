@@ -2,6 +2,7 @@ import { Terminal, ITerminalAddon, IDisposable } from 'xterm';
 import * as ansi from 'ansi-escapes';
 
 import Prompt from './Prompt';
+import NrfTerminalAddon from './NrfTerminalAddon';
 import HistoryAddon from './addons/HistoryAddon';
 import TimestampAddon from './addons/TimestampAddon';
 import CopyPasteAddon from './addons/CopyPasteAddon';
@@ -100,6 +101,8 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     #historyAddon!: HistoryAddon;
     autocompleteAddon!: AutocompleteAddon;
 
+    #addons: NrfTerminalAddon[] = [];
+
     #lineSpan = 0;
     #lineCount = 1;
     #userInput = '';
@@ -126,10 +129,12 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         const historyAddon = new HistoryAddon(this);
         this.#historyAddon = historyAddon;
         this.#terminal.loadAddon(historyAddon);
+        this.#addons.push(historyAddon);
 
         if (this.#config.showTimestamps) {
             const timestampAddon = new TimestampAddon(this);
             this.#terminal.loadAddon(timestampAddon);
+            this.#addons.push(timestampAddon);
             this.registerCommand('toggle_timestamps', () => {
                 timestampAddon.toggleTimestamps();
             });
@@ -137,16 +142,19 @@ export default class NrfTerminalCommander implements ITerminalAddon {
 
         const copyPasteAddon = new CopyPasteAddon(this);
         this.#terminal.loadAddon(copyPasteAddon);
+        this.#addons.push(copyPasteAddon);
 
         const autocompleteAddon = new AutocompleteAddon(
             this,
             this.#config.completerFunction
         );
         this.#terminal.loadAddon(autocompleteAddon);
+        this.#addons.push(autocompleteAddon);
         this.autocompleteAddon = autocompleteAddon;
 
         const hoverAddon = new HoverAddon(this, []);
         this.#terminal.loadAddon(hoverAddon);
+        this.#addons.push(hoverAddon);
 
         this.terminalMode = this.#config.terminalMode ?? defaultTerminalMode;
 
@@ -215,11 +223,11 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         }
 
         if (terminalMode.type == 'character') {
-            this.#historyAddon.disconnect();
+            this.#addons.forEach(addon => addon.disconnect());
             // We don't need to set onKey to achieve character mode
             this.#dataListener = this.#terminal.onData(terminalMode.onData);
         } else {
-            this.#historyAddon.connect();
+            this.#addons.forEach(addon => addon.connect());
             this.#keyListener = this.#terminal.onKey(this.onKey.bind(this));
             this.#dataListener = this.#terminal.onData(this.onData.bind(this));
         }

@@ -1,3 +1,5 @@
+import { IDisposable } from 'xterm';
+
 import NrfTerminalAddon from '../NrfTerminalAddon';
 import NrfTerminalCommander from '../NrfTerminalCommander';
 
@@ -21,16 +23,11 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     #prevUserInput = '';
     #hasCancelled = false;
 
+    #onKeyListener: IDisposable | null = null;
+
     constructor(commander: NrfTerminalCommander, completer: CompleterFunction) {
         super(commander);
         this.#completerFunction = completer;
-    }
-
-    public connect(): void {
-        // TODO: Implement
-    }
-    public disconnect(): void {
-        // TODO: Implement
     }
 
     public get isVisible() {
@@ -62,7 +59,14 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
             }
         });
 
-        this.terminal.onKey(({ domEvent }) => {
+        this.connect();
+    }
+
+    public connect(): void {
+        // Clear all current connections
+        this.disconnect();
+
+        this.#onKeyListener = this.terminal.onKey(({ domEvent }) => {
             switch (domEvent.code) {
                 case 'ArrowUp':
                     if (this.isVisible) return this.navigateUp();
@@ -82,6 +86,13 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
 
             this.#hasCancelled = false;
         });
+    }
+
+    public disconnect(): void {
+        if (this.#onKeyListener !== null) {
+            this.#onKeyListener.dispose();
+            this.#onKeyListener = null;
+        }
     }
 
     private initialiseContainer(): void {

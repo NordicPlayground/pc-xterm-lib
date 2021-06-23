@@ -28,6 +28,8 @@ export default class HoverAddon extends NrfTerminalAddon {
         });
     }
 
+    // No implementation required as we don't have onData or onKey handlers
     public connect(): void {}
+
     public disconnect(): void {}
 }

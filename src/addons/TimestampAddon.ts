@@ -1,6 +1,7 @@
 import * as dateFns from 'date-fns';
 import * as c from 'ansi-colors';
 import * as ansi from 'ansi-escapes';
+import { IDisposable } from 'xterm';
 
 import NrfTerminalAddon from '../NrfTerminalAddon';
 import NrfTerminalCommander from '../NrfTerminalCommander';
@@ -29,24 +30,33 @@ export default class TimestampAddon extends NrfTerminalAddon {
      */
     format: string;
 
+    #onDataListener: IDisposable | null = null;
+
     constructor(commander: NrfTerminalCommander, format?: string) {
         super(commander);
         this.format = format || 'HH:mm:ss';
     }
 
     protected onActivate() {
-        this.terminal.onData(data => {
+        this.connect();
+    }
+
+    public connect(): void {
+        // Clear all current connections
+        this.disconnect();
+
+        this.#onDataListener = this.terminal.onData(data => {
             if (this.showingTimestamps && charCode(data) === CharCodes.LF) {
                 this.writeTimestamp();
             }
         });
     }
 
-    public connect(): void {
-        // TODO: Implement
-    }
     public disconnect(): void {
-        // TODO: Implement
+        if (this.#onDataListener !== null) {
+            this.#onDataListener.dispose();
+            this.#onDataListener = null;
+        }
     }
 
     private writeTimestamp(): void {
