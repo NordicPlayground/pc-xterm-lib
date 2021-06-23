@@ -19,9 +19,7 @@ export interface KeyEvent {
 
 export type UserInputChangeListener = (userInput: string) => void;
 export type RunCommandListener = (command: string) => void;
-export type TerminalMode =
-    | { type: 'character'; onData: (data: string) => void; onKey: (key: KeyEvent) => void }
-    | { type: 'line' };
+export type TerminalMode = { type: 'character'; onData: (data: string) => void } | { type: 'line' };
 
 const defaultTerminalMode: TerminalMode = { type: 'line' };
 
@@ -215,7 +213,7 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         }
 
         if (terminalMode.type == 'character') {
-            this.#keyListener = this.#terminal.onKey(terminalMode.onKey);
+            // We don't need to set onKey to achieve character mode
             this.#dataListener = this.#terminal.onData(terminalMode.onData);
         } else {
             this.#keyListener = this.#terminal.onKey(this.onKey.bind(this));
