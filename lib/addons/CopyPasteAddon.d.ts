@@ -10,4 +10,6 @@ import NrfTerminalAddon from '../NrfTerminalAddon';
 export default class CopyPasteAddon extends NrfTerminalAddon {
     name: string;
     protected onActivate(): void;
+    connect(): void;
+    disconnect(): void;
 }

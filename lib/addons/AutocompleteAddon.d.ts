@@ -9,6 +9,8 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     #private;
     name: string;
     constructor(commander: NrfTerminalCommander, completer: CompleterFunction);
+    connect(): void;
+    disconnect(): void;
     get isVisible(): boolean;
     disable(): void;
     enable(): void;
