@@ -19,7 +19,9 @@ export interface KeyEvent {
 
 export type UserInputChangeListener = (userInput: string) => void;
 export type RunCommandListener = (command: string) => void;
-export type TerminalMode = { type: 'character'; onData: (data: string) => void } | { type: 'line' };
+export type TerminalMode =
+    | { type: 'character'; onData: (data: string) => void }
+    | { type: 'line' };
 
 const defaultTerminalMode: TerminalMode = { type: 'line' };
 
@@ -254,9 +256,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#userInputChangeListeners.push(listener);
 
         return () =>
-        (this.#userInputChangeListeners = this.#userInputChangeListeners.filter(
-            l => l !== listener
-        ));
+            (this.#userInputChangeListeners = this.#userInputChangeListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
@@ -269,9 +271,9 @@ export default class NrfTerminalCommander implements ITerminalAddon {
         this.#runCommandListeners.push(listener);
 
         return () =>
-        (this.#runCommandListeners = this.#runCommandListeners.filter(
-            l => l !== listener
-        ));
+            (this.#runCommandListeners = this.#runCommandListeners.filter(
+                l => l !== listener
+            ));
     }
 
     /**
@@ -320,11 +322,14 @@ export default class NrfTerminalCommander implements ITerminalAddon {
             if (this.atEndOfLine()) {
                 this.#terminal.write('\b \b');
                 this._cursorInputIndex = this.cursorInputIndex - 1;
-                this._userInput = this.userInput.slice(0, this.userInput.length - 1);
-            }
-            else {
-                const newUserInput = this.userInput.substring(0, this.cursorInputIndex - 1)
-                    + this.userInput.substring(this.cursorInputIndex);
+                this._userInput = this.userInput.slice(
+                    0,
+                    this.userInput.length - 1
+                );
+            } else {
+                const newUserInput =
+                    this.userInput.substring(0, this.cursorInputIndex - 1) +
+                    this.userInput.substring(this.cursorInputIndex);
                 const oldCursorInputIndex = this.cursorInputIndex;
                 this.replaceUserInput(newUserInput);
                 this._cursorInputIndex = oldCursorInputIndex - 1;
@@ -425,8 +430,10 @@ export default class NrfTerminalCommander implements ITerminalAddon {
     }
 
     private updateUserInput(data: string) {
-        const newUserInput = this.userInput.substring(0, this.cursorInputIndex)
-            + data + this.userInput.substring(this.cursorInputIndex);
+        const newUserInput =
+            this.userInput.substring(0, this.cursorInputIndex) +
+            data +
+            this.userInput.substring(this.cursorInputIndex);
         const oldCursorInputIndex = this.cursorInputIndex;
         this.replaceUserInput(newUserInput);
         this._cursorInputIndex = oldCursorInputIndex + data.length;

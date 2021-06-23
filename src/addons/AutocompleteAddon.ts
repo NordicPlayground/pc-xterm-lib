@@ -72,7 +72,8 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
                     this.#hasCancelled = true;
                     return this.clearSuggestions();
                 case 'Enter':
-                    if (this.isVisible) return this.selectSuggestion(this.#highlightedIndex);
+                    if (this.isVisible)
+                        return this.selectSuggestion(this.#highlightedIndex);
                 // Swallow backspace keys so they don't revert the cancel.
                 // This way the dialog will only appear again on a real keypress.
                 case 'Backspace':
