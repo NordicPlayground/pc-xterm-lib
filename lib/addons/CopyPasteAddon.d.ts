@@ -8,6 +8,7 @@ import NrfTerminalAddon from '../NrfTerminalAddon';
  * and Ctrl-V for paste. On a Mac, the Cmd key replaces the Ctrl key.
  */
 export default class CopyPasteAddon extends NrfTerminalAddon {
+    #private;
     name: string;
     protected onActivate(): void;
     connect(): void;
