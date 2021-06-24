@@ -1,3 +1,5 @@
+import { IDisposable } from 'xterm';
+
 import NrfTerminalAddon from '../NrfTerminalAddon';
 import NrfTerminalCommander from '../NrfTerminalCommander';
 
@@ -20,6 +22,8 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     #highlightedIndex = 0;
     #prevUserInput = '';
     #hasCancelled = false;
+
+    #onKeyListener: IDisposable | null = null;
 
     constructor(commander: NrfTerminalCommander, completer: CompleterFunction) {
         super(commander);
@@ -55,7 +59,14 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
             }
         });
 
-        this.terminal.onKey(({ domEvent }) => {
+        this.connect();
+    }
+
+    public connect(): void {
+        // Clear all current connections
+        this.disconnect();
+
+        this.#onKeyListener = this.terminal.onKey(({ domEvent }) => {
             switch (domEvent.code) {
                 case 'ArrowUp':
                     if (this.isVisible) return this.navigateUp();
@@ -65,7 +76,8 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
                     this.#hasCancelled = true;
                     return this.clearSuggestions();
                 case 'Enter':
-                    if (this.isVisible) return this.selectSuggestion(this.#highlightedIndex);
+                    if (this.isVisible)
+                        return this.selectSuggestion(this.#highlightedIndex);
                 // Swallow backspace keys so they don't revert the cancel.
                 // This way the dialog will only appear again on a real keypress.
                 case 'Backspace':
@@ -74,6 +86,13 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
 
             this.#hasCancelled = false;
         });
+    }
+
+    public disconnect(): void {
+        if (this.#onKeyListener !== null) {
+            this.#onKeyListener.dispose();
+            this.#onKeyListener = null;
+        }
     }
 
     private initialiseContainer(): void {

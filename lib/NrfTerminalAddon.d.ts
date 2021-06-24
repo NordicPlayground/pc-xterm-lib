@@ -23,4 +23,12 @@ export default abstract class NrfTerminalAddon implements ITerminalAddon {
     protected debug(message: string, ...meta: unknown[]): void;
     activate(terminal: Terminal): void;
     dispose(): void;
+    /**
+     * Connects up any onData and onKey handlers
+     */
+    abstract connect(): void;
+    /**
+     * Disconnects any onData and onKey handlers to allow terminal to function in a pure character mode
+     */
+    abstract disconnect(): void;
 }

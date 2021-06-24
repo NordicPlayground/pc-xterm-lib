@@ -1,3 +1,5 @@
+import { IDisposable } from 'xterm';
+
 import NrfTerminalAddon from '../NrfTerminalAddon';
 import { isMac } from '../utils';
 
@@ -12,10 +14,19 @@ import { isMac } from '../utils';
 export default class CopyPasteAddon extends NrfTerminalAddon {
     name = 'CopyPasteAddon';
 
+    #onKeyListener: IDisposable | null = null;
+
     protected onActivate() {
         if (isMac()) return;
 
-        this.terminal.onKey(async ({ domEvent }) => {
+        this.connect();
+    }
+
+    public connect(): void {
+        // Clear all current connections
+        this.disconnect();
+
+        this.#onKeyListener = this.terminal.onKey(async ({ domEvent }) => {
             if (isCopy(domEvent)) {
                 document.execCommand('copy');
             }
@@ -32,6 +43,13 @@ export default class CopyPasteAddon extends NrfTerminalAddon {
                 });
             }
         });
+    }
+
+    public disconnect(): void {
+        if (this.#onKeyListener !== null) {
+            this.#onKeyListener.dispose();
+            this.#onKeyListener = null;
+        }
     }
 }
 

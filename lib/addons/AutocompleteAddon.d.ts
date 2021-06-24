@@ -14,6 +14,8 @@ export default class AutocompleteAddon extends NrfTerminalAddon {
     enable(): void;
     private get completions();
     protected onActivate(): void;
+    connect(): void;
+    disconnect(): void;
     private initialiseContainer;
     private navigateUp;
     private navigateDown;

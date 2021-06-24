@@ -22,6 +22,8 @@ export default class TimestampAddon extends NrfTerminalAddon {
     format: string;
     constructor(commander: NrfTerminalCommander, format?: string);
     protected onActivate(): void;
+    connect(): void;
+    disconnect(): void;
     private writeTimestamp;
     /**
      * Whether or not timestamps will be shown on new commands.

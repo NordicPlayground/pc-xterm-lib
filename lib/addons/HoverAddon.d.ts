@@ -10,4 +10,6 @@ export default class HoverAddon extends NrfTerminalAddon {
     hoverMetadata: HoverMetadata[];
     constructor(commander: NrfTerminalCommander, hoverMetadata: HoverMetadata[]);
     protected onActivate(): void;
+    connect(): void;
+    disconnect(): void;
 }

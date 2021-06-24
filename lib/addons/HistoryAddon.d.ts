@@ -3,6 +3,8 @@ export default class HistoryAddon extends NrfTerminalAddon {
     #private;
     name: string;
     protected onActivate(): void;
+    connect(): void;
+    disconnect(): void;
     private addToHistory;
     private moveForwards;
     private moveBackwards;
