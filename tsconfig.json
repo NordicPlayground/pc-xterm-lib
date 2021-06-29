@@ -9,5 +9,6 @@
       "strict": true,
       "isolatedModules": true,
       "forceConsistentCasingInFileNames": true,
-  }
+  },
+  "include": ["./src/**/*.ts"]
 }
