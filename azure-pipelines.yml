@@ -24,6 +24,6 @@ steps:
   displayName: Build
 - script: |
     set -o errexit -o pipefail
-    npm run copyright -- --check
+    npm run copyright -- check
   displayName: Check copyright statements
 
