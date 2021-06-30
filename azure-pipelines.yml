@@ -5,24 +5,25 @@ pool:
   vmImage: ubuntu-20.04
 
 steps:
-- displayName: Install Node.js
-  task: NodeTool@0
+- task: NodeTool@0
   inputs:
     versionSpec: 14
-- displayName: Install dependencies
-  script: |
+  displayName: Install Node.js
+- script: |
     set -o errexit -o pipefail
     npm ci
-- displayName: Run linter
-  script: |
+  displayName: Install dependencies
+- script: |
     set -o errexit -o pipefail
     npm run format
-- displayName: Build
-  script: |
+  displayName: Run linter
+- script: |
     set -o errexit -o pipefail
     npm run build
     npm run dist
-- displayName: Check copyright statements
-  script: |
+  displayName: Build
+- script: |
     set -o errexit -o pipefail
     npm run copyright -- check
+  displayName: Check copyright statements
+
